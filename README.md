@@ -147,6 +147,22 @@ npm exec turbo link
 npm exec turbo link
 ```
 
+## Troubleshooting
+
+The dev servers bind fixed ports: **web `3000`**, **api `5000`**.
+
+`web` pins `--port 3000` because the API only accepts browser requests from `CORS_ORIGIN=http://localhost:3000` (see `apps/api/.env`). Letting the port float would break CORS, so both apps run a `predev` check (`scripts/ensure-port.mjs`) that reports which process is holding the port and the exact command to stop it.
+
+To see who holds a port yourself:
+
+```sh
+# macOS / Linux
+lsof -i tcp:3000
+
+# Windows PowerShell
+Get-NetTCPConnection -LocalPort 3000 -State Listen
+```
+
 ## Useful Links
 
 Learn more about the power of Turborepo:
