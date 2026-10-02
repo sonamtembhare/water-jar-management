@@ -1,7 +1,9 @@
-// next.config.ts
-import { NextConfig } from "next";
-import { APP_URL } from "./config/env";
-const nextConfig = NextConfig = {
+import process from "node:process";
+
+const APP_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000";
+
+/** @type {import('next').NextConfig} */
+const nextConfig = {
     async rewrites() {
         return [
             {
@@ -11,4 +13,5 @@ const nextConfig = NextConfig = {
         ];
     },
 };
+
 export default nextConfig;
