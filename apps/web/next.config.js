@@ -1,6 +1,6 @@
 import process from "node:process";
 
-const APP_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000";
+const APP_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
