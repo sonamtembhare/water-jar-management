@@ -11,10 +11,17 @@
 // was started from inside apps/api. dist is also committed as a fallback: if the
 // build cannot run here (a filtered install without dev deps, for example), the
 // checked-in output keeps the deployment working instead of failing the install.
+//
+// Vercel installs Turborepo repos with a workspace filter
+// (`npm install --workspace=web --include-workspace-root`), so packages that are
+// not dependencies of the package being deployed never get their dependencies
+// installed. Compiling those packages here would only print a page of
+// "Cannot find module" errors, so each one is checked up front and left on its
+// committed dist instead.
 
 import { spawnSync } from "node:child_process"
 import { createRequire } from "node:module"
-import { existsSync } from "node:fs"
+import { existsSync, readdirSync, readFileSync } from "node:fs"
 import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
@@ -28,6 +35,8 @@ const packages = ["packages/types", "packages/db"]
 // which is enough to compile these two packages.
 const typescriptRoots = [repoRoot, join(repoRoot, "apps/api")]
 
+const readManifest = (dir) => JSON.parse(readFileSync(join(dir, "package.json"), "utf8"))
+
 const resolveTsc = () => {
   for (const root of typescriptRoots) {
     try {
@@ -37,6 +46,43 @@ const resolveTsc = () => {
     }
   }
   return null
+}
+
+// Workspace siblings are symlinked rather than installed, so they always
+// resolve. They must not be reported as missing dependencies.
+const workspaceNames = (() => {
+  const names = new Set()
+  for (const pattern of readManifest(repoRoot).workspaces ?? []) {
+    const parent = pattern.replace(/\/\*$/, "")
+    if (parent === pattern || !existsSync(join(repoRoot, parent))) continue
+    for (const entry of readdirSync(join(repoRoot, parent), { withFileTypes: true })) {
+      if (entry.isDirectory() && existsSync(join(repoRoot, parent, entry.name, "package.json"))) {
+        names.add(readManifest(join(repoRoot, parent, entry.name)).name)
+      }
+    }
+  }
+  return names
+})()
+
+const isResolvable = (require, name) => {
+  for (const specifier of [`${name}/package.json`, name]) {
+    try {
+      require.resolve(specifier)
+      return true
+    } catch {
+      continue
+    }
+  }
+  return false
+}
+
+const missingDependencies = (pkg) => {
+  const manifest = join(repoRoot, pkg)
+  const require = createRequire(join(manifest, "package.json"))
+  const { dependencies, devDependencies } = readManifest(manifest)
+  return Object.keys({ ...dependencies, ...devDependencies }).filter(
+    (name) => !workspaceNames.has(name) && !isResolvable(require, name),
+  )
 }
 
 const hasDist = (pkg) => existsSync(join(repoRoot, pkg, "dist", "index.d.ts"))
@@ -56,17 +102,42 @@ if (!tsc) {
   process.exit(1)
 }
 
-const failed = packages.filter((pkg) => buildPackage(tsc, pkg).status !== 0)
-const committed = packages.every(hasDist)
+const buildable = []
+const uninstallable = []
+
+for (const pkg of packages) {
+  const missing = missingDependencies(pkg)
+  if (missing.length === 0) {
+    buildable.push(pkg)
+  } else if (hasDist(pkg)) {
+    uninstallable.push(`${pkg} (${missing.join(", ")} not installed)`)
+  } else {
+    console.error(
+      `[postinstall] ${pkg} needs ${missing.join(", ")}, which this install did not provide, and dist is missing`,
+    )
+    process.exit(1)
+  }
+}
+
+const failed = buildable.filter((pkg) => buildPackage(tsc, pkg).status !== 0)
+
+for (const pkg of uninstallable) {
+  console.warn(`[postinstall] skipping ${pkg} - keeping the committed package dist`)
+}
+
+const built = buildable.filter((pkg) => !failed.includes(pkg))
+
+if (built.length > 0) {
+  console.log("[postinstall] built " + built.join(", "))
+}
 
 if (failed.length === 0) {
-  console.log("[postinstall] built " + packages.join(", "))
   process.exit(0)
 }
 
 // A failed build still leaves a usable deployment as long as dist is committed,
 // so only hard-fail when there is nothing to fall back to.
-if (committed) {
+if (packages.every(hasDist)) {
   console.warn(
     `[postinstall] build failed for ${failed.join(", ")} - keeping the committed package dist`,
   )
