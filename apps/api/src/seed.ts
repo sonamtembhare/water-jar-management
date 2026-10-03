@@ -129,7 +129,7 @@ async function seedDemoData() {
   }
 
   const customer = await upsertUser({
-    email: "customer@waterjar.com                                     ",
+    email: "customer@waterjar.com",
     password: "customer12345",
     name: "Demo Customer",
     role: "customer",
