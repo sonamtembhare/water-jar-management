@@ -4,6 +4,10 @@
     "types": [
       "node"
     ],
+    "typeRoots": [
+      "./node_modules/@types",
+      "../../node_modules/@types"
+    ],
     "rootDir": "./src",
     "outDir": "./dist"
   },
@@ -13,5 +17,5 @@
   "exclude": [
     "node_modules",
     "dist"
-  ],
+  ]
 }

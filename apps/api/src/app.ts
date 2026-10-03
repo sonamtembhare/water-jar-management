@@ -14,6 +14,7 @@ import { analyticsRouter } from "./routes/analytics.routes"
 import { adminRouter } from "./routes/admin.routes"
 
 export const app = express()
+export default app
 
 app.disable("x-powered-by")
 app.use(helmet())
