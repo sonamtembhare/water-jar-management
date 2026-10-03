@@ -1,6 +1,4 @@
 {
     "$schema": "https://openapi.vercel.sh/vercel.json",
-    "framework": "express",
-    "buildCommand": "cd ../.. && npx turbo run build --filter=api",
-    "outputDirectory": null
+    "framework": "express"
 }

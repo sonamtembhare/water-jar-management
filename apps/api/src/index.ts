@@ -27,6 +27,7 @@ async function startServer() {
 // work like the database health check above would delay that capture and can
 // trip Vercel's 1s wait-for-listen timeout, so it is skipped there. The
 // /health route already reports liveness without touching the database.
+
 const isServerless = Boolean(process.env.VERCEL);
 if (!isServerless) {
   startServer();
