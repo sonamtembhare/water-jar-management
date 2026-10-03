@@ -27,6 +27,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { NotificationsBell } from "@/components/notifications-popover";
+import { ServerStatusBanner } from "@/components/server-status-banner";
 
 interface NavItem {
   href: string;
@@ -87,7 +88,9 @@ export function AppShell({ children }: { children: ReactNode }) {
     );
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen flex flex-col">
+      {/* ── Full-width server status banner (only visible when not online) ── */}
+      <ServerStatusBanner />
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r bg-card md:flex">
         <Link
           href={nav[0]?.href ?? "/"}
@@ -148,6 +151,8 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
         <div className="hidden flex-col md:flex" />
         <div className="flex items-center gap-2">
+          {/* Compact server status pill always visible in header */}
+          <ServerStatusBanner compact />
           <NotificationsBell />
           <div className="flex items-center gap-2 md:hidden">
             <span className="text-sm font-medium">{user.name.split(" ")[0]}</span>
