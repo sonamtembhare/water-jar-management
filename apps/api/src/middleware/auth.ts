@@ -92,9 +92,13 @@ export function errorHandler(
   })
 }
 
-export function notFoundHandler(_req: Request, res: Response) {
+export function notFoundHandler(req: Request, res: Response) {
   return res.status(404).json({
     success: false,
-    error: { code: "NOT_FOUND", message: "Route not found" },
+    error: {
+      code: "NOT_FOUND",
+      message: `Route not found: ${req.method} ${req.originalUrl}`,
+      hint: "Check GET / for the list of available routes",
+    },
   })
 }

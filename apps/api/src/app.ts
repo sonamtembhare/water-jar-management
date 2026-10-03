@@ -70,6 +70,28 @@ api.use("/analytics", analyticsRouter)
 api.use("/admin", adminRouter)
 app.use("/api/v1", api)
 
+app.get("/", (_req, res) => {
+  res.json({
+    success: true,
+    message: "Water Jar Management API",
+    status: "running",
+    time: new Date().toISOString(),
+    health: "/health",
+    base: "/api/v1",
+    routes: [
+      "/api/v1/auth",
+      "/api/v1/vendors",
+      "/api/v1/vendor",
+      "/api/v1/customers",
+      "/api/v1/payments",
+      "/api/v1/notifications",
+      "/api/v1/analytics",
+      "/api/v1/admin",
+      "/api/v1/webhooks",
+    ],
+  })
+})
+
 app.get("/health", (_req, res) => {
   res.json({ status: "ok", time: new Date().toISOString() })
 })
