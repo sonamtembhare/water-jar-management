@@ -27,6 +27,16 @@ out/
 build
 dist
 
+# apps/api is deployed with a legacy `builds` entry, which disables the Turbo
+# build step, so @repo/db and @repo/types must arrive on the build machine
+# pre-compiled. `scripts/ensure-workspace-dist.mjs` rebuilds them during
+# postinstall and falls back to these files when it cannot run.
+# The directory itself has to be un-ignored before its contents.
+!packages/db/dist/
+!packages/db/dist/**
+!packages/types/dist/
+!packages/types/dist/**
+
 
 # Debug
 npm-debug.log*

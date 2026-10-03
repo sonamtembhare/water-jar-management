@@ -12,7 +12,6 @@ import { paymentsRouter, webhookRouter } from "./routes/payments.routes"
 import { notificationsRouter } from "./routes/notifications.routes"
 import { analyticsRouter } from "./routes/analytics.routes"
 import { adminRouter } from "./routes/admin.routes"
-import { listen } from "node:quic"
 
 export const app = express()
 export default app

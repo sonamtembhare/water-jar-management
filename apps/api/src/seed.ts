@@ -32,9 +32,24 @@ async function upsertUser(values: {
 }
 
 async function seedSuperAdmin() {
+  const isProduction = Boolean(process.env.VERCEL) || process.env.NODE_ENV === "production"
+  const password = process.env.SEED_ADMIN_PASSWORD
+  // On Vercel the handler seeds on every cold start, so falling back to the local
+  // default would publish a super admin with a well-known password. Refuse to
+  // seed instead; locally the default keeps `npm run seed` frictionless.
+  if (isProduction && (!password || password.length < 16)) {
+    console.warn(
+      "[seed] SEED_ADMIN_PASSWORD missing or shorter than 16 chars - skipping super admin seed",
+    )
+    return
+  }
   const email = process.env.SEED_ADMIN_EMAIL ?? "admin@waterjar.com"
-  const password = process.env.SEED_ADMIN_PASSWORD ?? "admin12345"
-  await upsertUser({ email, password, name: "Super Admin", role: "super_admin" })
+  await upsertUser({
+    email,
+    password: password ?? "admin12345",
+    name: "Super Admin",
+    role: "super_admin",
+  })
 }
 
 async function seedDemoData() {

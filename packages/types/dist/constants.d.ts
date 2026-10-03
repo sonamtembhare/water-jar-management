@@ -1,0 +1,24 @@
+export declare const USER_ROLES: readonly ["super_admin", "vendor", "customer"];
+export type UserRole = (typeof USER_ROLES)[number];
+export declare const USER_STATUSES: readonly ["active", "blocked"];
+export type UserStatus = (typeof USER_STATUSES)[number];
+export declare const VENDOR_STATUSES: readonly ["pending", "approved", "rejected"];
+export type VendorStatus = (typeof VENDOR_STATUSES)[number];
+export declare const ORDER_STATUSES: readonly ["pending", "accepted", "out_for_delivery", "delivered", "cancelled"];
+export type OrderStatus = (typeof ORDER_STATUSES)[number];
+export declare const PAYMENT_METHODS: readonly ["cash", "online"];
+export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
+export declare const PAYMENT_STATUSES: readonly ["created", "paid", "failed", "refunded"];
+export type PaymentStatus = (typeof PAYMENT_STATUSES)[number];
+export declare const INVENTORY_REASONS: readonly ["sale", "refund", "restock", "lost", "damaged"];
+export type InventoryReason = (typeof INVENTORY_REASONS)[number];
+export type NotificationType = "order_placed" | "order_accepted" | "order_rejected" | "order_out_for_delivery" | "order_delivered" | "order_cancelled" | "payment_received" | "payment_failed" | "vendor_approved" | "vendor_rejected" | "vendor_application_submitted" | "vendor_application_status" | "vendor_blocked" | "vendor_unblocked" | "new_order" | "payment_pending" | "customer_added" | "customer_closed" | "customer_reopened" | "delivery_created" | "reminder" | "general";
+export declare const ORDER_STATUS_LABELS: Record<OrderStatus, string>;
+export declare const PAYMENT_STATUS_LABELS: Record<PaymentStatus, string>;
+export declare const VENDOR_STATUS_LABELS: Record<VendorStatus, string>;
+export declare const USER_STATUS_LABELS: Record<UserStatus, string>;
+export declare const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string>;
+export declare function formatINR(amount: number): string;
+export declare function formatDateTime(value: string | Date | null | undefined): string;
+export declare function formatDate(value: string | Date | null | undefined): string;
+//# sourceMappingURL=constants.d.ts.map
