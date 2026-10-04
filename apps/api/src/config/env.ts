@@ -16,9 +16,15 @@ const envSchema = z.object({
 
   JWT_EXPIRES_IN: z.string().default("7d"),
 
-  CORS_ORIGIN: z.string().default(
-    "https://water-jar-management1-git-main-sonamtembhare01-4932s-projects.vercel.app"
-  ),
+  // Browser origins allowed to call the API. Comma-separated. In production
+  // this MUST list the deployed web domain(s); otherwise every browser request
+  // is rejected by the CORS guard. `*` is allowed as a whole segment, e.g.
+  // `https://*.vercel.app` to also accept preview deployments.
+  CORS_ORIGIN: z.string().default("http://localhost:3000"),
+
+  // Public URL of the web app. Used for links the API generates (emails).
+  // Defaults to the first entry of CORS_ORIGIN.
+  WEB_APP_URL: z.string().optional(),
 
   RAZORPAY_KEY_ID: z.string().optional(),
   RAZORPAY_KEY_SECRET: z.string().optional(),
@@ -48,6 +54,4 @@ if (!parsed.success) {
 export const env = parsed.data
 
 export const APP_URL =
-  process.env.NODE_ENV === "production"
-    ? "https://water-jar-management1-git-main-sonamtembhare01-4932s-projects.vercel.app"
-    : "http://localhost:3000"
+  env.WEB_APP_URL?.trim() || env.CORS_ORIGIN.split(",")[0]?.trim() || "http://localhost:3000"

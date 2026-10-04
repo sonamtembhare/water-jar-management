@@ -163,6 +163,31 @@ lsof -i tcp:3000
 Get-NetTCPConnection -LocalPort 3000 -State Listen
 ```
 
+## Production deploy
+
+The web app never talks to the API over a relative URL — `apps/web/src/lib/utils.ts` builds every
+request from `NEXT_PUBLIC_API_URL`. Two variables on the Vercel projects have to line up, and a
+mismatch fails silently (the browser just sees a network error, so every admin/customer/vendor
+screen renders empty):
+
+| Project (Vercel) | Variable | Value |
+| --- | --- | --- |
+| web | `NEXT_PUBLIC_API_URL` | the API project's production URL, no trailing slash — e.g. `https://<api-project>.vercel.app` |
+| api | `CORS_ORIGIN` | the web project's production origin(s), comma-separated — e.g. `https://<web-project>.vercel.app` |
+
+Notes:
+
+- Never point `NEXT_PUBLIC_API_URL` at a *preview* deployment (`<project>-git-<branch>-…`). Those are
+  behind Vercel Deployment Protection and answer `302` to an SSO login page, so `res.json()` throws
+  and no data ever loads.
+- Never point `NEXT_PUBLIC_API_URL` at the web project's own domain. `next.config.js` proxies
+  `/api/*` there, which becomes a `308` redirect loop; the config detects this at build time and
+  disables the proxy.
+- `CORS_ORIGIN` supports `*` as a whole segment (e.g. `https://*.vercel.app`) to also allow preview
+  deployments of the web app.
+- `NEXT_PUBLIC_*` values are inlined at build time, so the web project has to be **rebuilt** after
+  changing the variable — saving the env var alone changes nothing.
+
 ## Useful Links
 
 Learn more about the power of Turborepo:
