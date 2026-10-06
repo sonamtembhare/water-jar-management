@@ -102,6 +102,9 @@ export declare const vendorAnalyticsSchema: z.ZodObject<{
         status: z.ZodString;
         count: z.ZodNumber;
     }, z.core.$strip>>;
+    todaysOrders: z.ZodNumber;
+    todaysDelivered: z.ZodNumber;
+    todaysPending: z.ZodNumber;
     deliveriesToday: z.ZodNumber;
     incomeToday: z.ZodNumber;
     monthlyIncome: z.ZodNumber;

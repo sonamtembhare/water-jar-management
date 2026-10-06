@@ -53,6 +53,9 @@ exports.jarTrendPointSchema = zod_1.z.object({
     jars: zod_1.z.number(),
 });
 exports.vendorAnalyticsSchema = exports.analyticsOverviewSchema.extend({
+    todaysOrders: zod_1.z.number(),
+    todaysDelivered: zod_1.z.number(),
+    todaysPending: zod_1.z.number(),
     deliveriesToday: zod_1.z.number(),
     incomeToday: zod_1.z.number(),
     monthlyIncome: zod_1.z.number(),

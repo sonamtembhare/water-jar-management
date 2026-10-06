@@ -59,6 +59,9 @@ export const jarTrendPointSchema = z.object({
 })
 
 export const vendorAnalyticsSchema = analyticsOverviewSchema.extend({
+  todaysOrders: z.number(),
+  todaysDelivered: z.number(),
+  todaysPending: z.number(),
   deliveriesToday: z.number(),
   incomeToday: z.number(),
   monthlyIncome: z.number(),

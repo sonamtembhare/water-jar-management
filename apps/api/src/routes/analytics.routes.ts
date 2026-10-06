@@ -1,6 +1,6 @@
 import { Router } from "express"
 import { and, asc, count, desc, eq, gte, min, ne, sql } from "drizzle-orm"
-import { customers, db, orderItems, orders, products, vendors } from "@repo/db"
+import { customers, db, orderItems, orders, products, vendors, vendorCustomers } from "@repo/db"
 import { asyncHandler } from "../middleware/error"
 import { requireAuth } from "../middleware/auth"
 import { getCustomerByUserId } from "../services/orderFlow"
@@ -42,10 +42,12 @@ analyticsRouter.get("/overview", asyncHandler(async (req, res) => {
 
   const totalCustomers =
     role === "vendor" && vendorId
+      // The dashboard shows every customer linked to this business, not just
+      // the ones who already placed an order — count vendorCustomers for the JWT vendor.
       ? await db
-          .select({ value: sql<number>`count(distinct ${orders.customerId})::text` })
-          .from(orders)
-          .where(scopeCond ?? sql`true`)
+          .select({ value: count() })
+          .from(vendorCustomers)
+          .where(eq(vendorCustomers.vendorId, vendorId))
           .then((r) => Number(r[0]?.value ?? 0))
       : role === "customer"
         ? 0
@@ -224,6 +226,18 @@ analyticsRouter.get("/overview", asyncHandler(async (req, res) => {
       .from(orders)
       .where(and(vCond, eq(orders.status, "delivered"), gte(orders.deliveredAt, todayStart)))
 
+    // "Today's summary": every order created today plus the delivered/pending
+    // split, all scoped to the authenticated vendor's own orders.
+    const todayStatusRows = await db
+      .select({ status: orders.status, value: count() })
+      .from(orders)
+      .where(and(vCond, gte(orders.createdAt, todayStart)))
+      .groupBy(orders.status)
+    const todayStatusMap = new Map(todayStatusRows.map((r) => [r.status, Number(r.value ?? 0)]))
+    const todaysOrders = [...todayStatusMap.values()].reduce((a, b) => a + b, 0)
+    const todaysPending = todayStatusMap.get("pending") ?? 0
+    const todaysDelivered = Number(dtRow?.value ?? 0)
+
     const [incToday] = await db
       .select({ value: sql<number>`coalesce(sum(${orders.grandTotal})::numeric, 0)::text` })
       .from(orders)
@@ -327,6 +341,10 @@ analyticsRouter.get("/overview", asyncHandler(async (req, res) => {
       success: true,
       data: {
         ...overview,
+        totalCustomers,
+        todaysOrders,
+        todaysDelivered,
+        todaysPending,
         deliveriesToday: Number(dtRow?.value ?? 0),
         incomeToday: Number(incToday?.value ?? 0),
         monthlyIncome: Number(incMonth?.value ?? 0),
