@@ -16,9 +16,10 @@ import {
   type Database,
 } from "@repo/db"
 import type { CreateOrderInput, OrderStatus } from "@repo/types"
+import { ORDER_STATUS_LABELS } from "@repo/types"
 import { badRequest, conflict, forbidden, notFound } from "../middleware/error"
 import { generateOrderNumber } from "../utils/helpers"
-import { notify } from "./notification"
+import { notify, orderStatusEmail } from "./notification"
 import { serializeOrderDetail } from "./serialize"
 
 type DbTx = Parameters<Parameters<Database["transaction"]>[0]>[0]
@@ -442,6 +443,13 @@ export async function notifyOrderParties(
       body: `Your order ${orderRow.orderNumber} is now ${newStatus.replaceAll("_", " ")}.`,
       href: `/customer/orders/${orderRow.id}`,
       emailRecipient: customerUser.email,
+      email: orderStatusEmail({
+        recipientName: customerUser.name,
+        orderNumber: orderRow.orderNumber,
+        statusLabel: ORDER_STATUS_LABELS[newStatus],
+        vendorName: await vendorDisplayName(orderRow.vendorId),
+        note,
+      }),
     })
   }
   if (vendorUser) {
@@ -452,8 +460,24 @@ export async function notifyOrderParties(
       body: `Order ${orderRow.orderNumber} is now ${newStatus.replaceAll("_", " ")}.${note ? ` Note: ${note}` : ""}`,
       href: `/vendor/orders/${orderRow.id}`,
       emailRecipient: vendorUser.email,
+      email: orderStatusEmail({
+        recipientName: vendorUser.name,
+        orderNumber: orderRow.orderNumber,
+        statusLabel: ORDER_STATUS_LABELS[newStatus],
+        note,
+      }),
     })
   }
+}
+
+async function vendorDisplayName(vendorId: string) {
+  const row = await db
+    .select({ name: vendors.name })
+    .from(vendors)
+    .where(eq(vendors.id, vendorId))
+    .limit(1)
+    .then((r) => r[0])
+  return row?.name ?? null
 }
 
 export async function loadOrderDetail(

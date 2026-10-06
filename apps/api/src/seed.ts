@@ -1,4 +1,4 @@
-import "./config/env"
+import { ADMIN_EMAIL, ADMIN_PASSWORD } from "./config/env"
 import { eq } from "drizzle-orm"
 import { customers, db, products, users, vendors } from "@repo/db"
 import { hashPassword } from "./utils/password"
@@ -33,20 +33,20 @@ async function upsertUser(values: {
 
 async function seedSuperAdmin() {
   const isProduction = Boolean(process.env.VERCEL) || process.env.NODE_ENV === "production"
-  const password = process.env.SEED_ADMIN_PASSWORD
   // On Vercel the handler seeds on every cold start, so falling back to the local
   // default would publish a super admin with a well-known password. Refuse to
   // seed instead; locally the default keeps `npm run seed` frictionless.
-  if (isProduction && (!password || password.length < 16)) {
+  if (isProduction && (!ADMIN_PASSWORD || ADMIN_PASSWORD.length < 16)) {
     console.warn(
-      "[seed] SEED_ADMIN_PASSWORD missing or shorter than 16 chars - skipping super admin seed",
+      "[seed] SUPER_ADMIN_PASSWORD missing or shorter than 16 chars - skipping super admin seed",
     )
     return
   }
-  const email = process.env.SEED_ADMIN_EMAIL ?? "admin@waterjar.com"
+  // Idempotent: upsertUser returns the existing row untouched, so re-running the
+  // seed never creates a duplicate super admin or resets the password.
   await upsertUser({
-    email,
-    password: password ?? "admin12345",
+    email: ADMIN_EMAIL,
+    password: ADMIN_PASSWORD ?? "admin12345",
     name: "Super Admin",
     role: "super_admin",
   })

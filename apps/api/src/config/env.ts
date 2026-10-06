@@ -36,8 +36,21 @@ const envSchema = z.object({
   SMTP_PASS: z.string().optional(),
   SMTP_FROM: z.string().optional(),
 
-  SEED_ADMIN_EMAIL: z.string().default("admin@waterjar.com"),
-  SEED_ADMIN_PASSWORD: z.string().default("admin12345"),
+  // Expo Push Notification Service. Push is opt-in so a self-hosted or
+  // development deployment without Expo credentials simply skips it.
+  PUSH_NOTIFICATIONS_ENABLED: z
+    .enum(["true", "false"])
+    .default("false")
+    .transform((v) => v === "true"),
+  EXPO_PUSH_ACCESS_TOKEN: z.string().optional(),
+  EXPO_PUSH_ANDROID_CHANNEL: z.string().default("deliveries"),
+
+  // Super admin seed credentials. `SUPER_ADMIN_*` is the documented name;
+  // `SEED_ADMIN_*` is kept for backwards compatibility with existing .env files.
+  SUPER_ADMIN_EMAIL: z.string().optional(),
+  SUPER_ADMIN_PASSWORD: z.string().optional(),
+  SEED_ADMIN_EMAIL: z.string().optional(),
+  SEED_ADMIN_PASSWORD: z.string().optional(),
   SEED_DEMO_DATA: z.enum(["true", "false"]).default("true"),
 })
 
@@ -52,6 +65,12 @@ if (!parsed.success) {
 }
 
 export const env = parsed.data
+
+export const ADMIN_EMAIL =
+  env.SUPER_ADMIN_EMAIL?.trim() || env.SEED_ADMIN_EMAIL?.trim() || "admin@waterjar.com"
+
+export const ADMIN_PASSWORD =
+  env.SUPER_ADMIN_PASSWORD || env.SEED_ADMIN_PASSWORD || undefined
 
 export const APP_URL =
   env.WEB_APP_URL?.trim() || env.CORS_ORIGIN.split(",")[0]?.trim() || "http://localhost:3000"

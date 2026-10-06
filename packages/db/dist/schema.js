@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.notifications = exports.inventoryLog = exports.payments = exports.deliveryEvents = exports.deliveries = exports.orderItems = exports.orders = exports.priceHistory = exports.products = exports.customerPrices = exports.vendorCustomers = exports.customers = exports.vendors = exports.users = exports.customerRelationStatusEnum = exports.inventoryReasonEnum = exports.paymentStatusEnum = exports.orderSourceEnum = exports.paymentMethodEnum = exports.orderStatusEnum = exports.vendorStatusEnum = exports.userStatusEnum = exports.userRoleEnum = void 0;
+exports.pushTokens = exports.notifications = exports.inventoryLog = exports.payments = exports.deliveryEvents = exports.deliveries = exports.orderItems = exports.orders = exports.priceHistory = exports.products = exports.customerPrices = exports.vendorCustomers = exports.customers = exports.vendors = exports.users = exports.customerRelationStatusEnum = exports.inventoryReasonEnum = exports.paymentStatusEnum = exports.orderSourceEnum = exports.paymentMethodEnum = exports.orderStatusEnum = exports.vendorStatusEnum = exports.userStatusEnum = exports.userRoleEnum = void 0;
 const pg_core_1 = require("drizzle-orm/pg-core");
 exports.userRoleEnum = (0, pg_core_1.pgEnum)("user_role", [
     "super_admin",
@@ -324,4 +324,24 @@ exports.notifications = (0, pg_core_1.pgTable)("notifications", {
 }, (table) => [
     (0, pg_core_1.index)("notifications_user_idx").on(table.userId),
     (0, pg_core_1.index)("notifications_user_read_idx").on(table.userId, table.readAt),
+]);
+/**
+ * Expo push tokens registered by the vendor mobile app. One row per device.
+ *
+ * `token` is globally unique so a phone that switches accounts re-owns the row
+ * on register instead of accumulating duplicates, and so a rolled/rotated token
+ * can be pruned after the push service reports `DeviceNotRegistered`.
+ */
+exports.pushTokens = (0, pg_core_1.pgTable)("push_tokens", {
+    id: (0, pg_core_1.uuid)("id").primaryKey().defaultRandom(),
+    userId: (0, pg_core_1.uuid)("user_id")
+        .notNull()
+        .references(() => exports.users.id, { onDelete: "cascade" }),
+    token: (0, pg_core_1.text)("token").notNull(),
+    platform: (0, pg_core_1.text)("platform"),
+    lastSeenAt: (0, pg_core_1.timestamp)("last_seen_at").notNull().defaultNow(),
+    createdAt: (0, pg_core_1.timestamp)("created_at").notNull().defaultNow(),
+}, (table) => [
+    (0, pg_core_1.uniqueIndex)("push_tokens_token_idx").on(table.token),
+    (0, pg_core_1.index)("push_tokens_user_idx").on(table.userId),
 ]);

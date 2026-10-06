@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.markReadSchema = exports.unreadCountSchema = exports.notificationsResponseSchema = exports.notificationSchema = void 0;
+exports.markReadSchema = exports.pushTokenSchema = exports.unreadCountSchema = exports.notificationsResponseSchema = exports.notificationSchema = void 0;
 const zod_1 = require("zod");
 exports.notificationSchema = zod_1.z.object({
     id: zod_1.z.string().uuid(),
@@ -22,6 +22,16 @@ exports.notificationsResponseSchema = zod_1.z.object({
 exports.unreadCountSchema = zod_1.z.object({
     unread: zod_1.z.number(),
 });
+/** Expo push token, e.g. `ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]`. */
+exports.pushTokenSchema = zod_1.z
+    .object({
+    token: zod_1.z
+        .string()
+        .max(200)
+        .regex(/^(ExponentPushToken\[.+\]|ExpoPushToken\[.+\])$/, "Invalid Expo push token"),
+    platform: zod_1.z.enum(["ios", "android", "web"]).optional(),
+})
+    .strict();
 exports.markReadSchema = zod_1.z
     .object({
     id: zod_1.z.string().uuid(),

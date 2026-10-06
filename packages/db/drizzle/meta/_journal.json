@@ -43,6 +43,13 @@
       "when": 1790744782107,
       "tag": "0005_amusing_tomorrow_man",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791193072811,
+      "tag": "0006_aberrant_grandmaster",
+      "breakpoints": true
     }
   ]
 }

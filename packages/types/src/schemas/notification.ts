@@ -23,6 +23,17 @@ export const unreadCountSchema = z.object({
   unread: z.number(),
 })
 
+/** Expo push token, e.g. `ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]`. */
+export const pushTokenSchema = z
+  .object({
+    token: z
+      .string()
+      .max(200)
+      .regex(/^(ExponentPushToken\[.+\]|ExpoPushToken\[.+\])$/, "Invalid Expo push token"),
+    platform: z.enum(["ios", "android", "web"]).optional(),
+  })
+  .strict()
+
 export const markReadSchema = z
   .object({
     id: z.string().uuid(),
@@ -34,3 +45,4 @@ export const markReadSchema = z
 export type Notification = z.infer<typeof notificationSchema>
 export type NotificationsResponse = z.infer<typeof notificationsResponseSchema>
 export type UnreadCount = z.infer<typeof unreadCountSchema>
+export type PushTokenInput = z.infer<typeof pushTokenSchema>

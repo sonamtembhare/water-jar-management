@@ -2,6 +2,7 @@ export declare const usersRelations: import("drizzle-orm").Relations<"users", {
     vendor: import("drizzle-orm").One<"vendors", false>;
     customer: import("drizzle-orm").One<"customers", true>;
     notifications: import("drizzle-orm").Many<"notifications">;
+    pushTokens: import("drizzle-orm").Many<"push_tokens">;
 }>;
 export declare const vendorsRelations: import("drizzle-orm").Relations<"vendors", {
     owner: import("drizzle-orm").One<"users", false>;

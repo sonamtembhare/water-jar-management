@@ -1,12 +1,12 @@
 import { Router } from "express"
 import { and, count, desc, eq, inArray } from "drizzle-orm"
 import { customers, db, orderItems, orders, products, users, vendorCustomers } from "@repo/db"
-import { vendorDeliveryCreateSchema, formatINR } from "@repo/types"
+import { vendorDeliveryCreateSchema, formatINR, formatDate, ORDER_STATUS_LABELS } from "@repo/types"
 import { asyncHandler, badRequest, notFound } from "../middleware/error"
 import { requireVendorUser } from "../middleware/auth"
 import { validateBody } from "../middleware/validate"
 import { createOrderForCustomer, loadOrderDetail } from "../services/orderFlow"
-import { notify } from "../services/notification"
+import { notify, deliveryConfirmationEmail } from "../services/notification"
 import { paramStr } from "../utils/helpers"
 
 export const vendorDeliveryRouter = Router()
@@ -153,15 +153,28 @@ vendorDeliveryRouter.post(
       .map((item) => `${item.quantity} x ${item.productName} (${item.sizeLiters}L)`)
       .join(", ")
 
-    await notify({
+    // The order is fully committed in PostgreSQL before any email is sent, so a
+    // customer only ever receives a confirmation once the delivery is saved.
+    // notify() inserts the in-app notification, fires the Expo push, and sends
+    // the SMTP email to the customer; it reports whether the email actually went out.
+    const emailSent = await notify({
       userId: relation.user.id,
       type: "delivery_created",
       title: "Delivery recorded",
       body: `${itemSummary} delivery recorded. Order ${detail.orderNumber}. Total ${formatINR(detail.grandTotal)}.${data.notes ? ` Note: ${data.notes}` : ""}`,
       href: `/customer/orders/${detail.id}`,
       emailRecipient: relation.user.email,
+      email: deliveryConfirmationEmail({
+        recipientName: relation.user.name,
+        orderNumber: detail.orderNumber,
+        date: formatDate(detail.createdAt),
+        jarCount: detail.items.reduce((sum, item) => sum + item.quantity, 0),
+        statusLabel: ORDER_STATUS_LABELS[detail.status],
+        vendorName: detail.vendor?.name,
+        note: data.notes,
+      }),
     })
 
-    res.status(201).json({ success: true, data: detail })
+    res.status(201).json({ success: true, data: { ...detail, emailSent } })
   }),
 )

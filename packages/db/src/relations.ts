@@ -10,6 +10,7 @@ import {
   payments,
   priceHistory,
   products,
+  pushTokens,
   users,
   vendors,
 } from "./schema"
@@ -24,6 +25,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
     references: [customers.userId],
   }),
   notifications: many(notifications),
+  pushTokens: many(pushTokens),
 }))
 
 export const vendorsRelations = relations(vendors, ({ one, many }) => ({

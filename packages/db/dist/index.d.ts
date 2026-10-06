@@ -9,6 +9,7 @@ declare function createDb(): import("drizzle-orm/node-postgres").NodePgDatabase<
         vendor: import("drizzle-orm").One<"vendors", false>;
         customer: import("drizzle-orm").One<"customers", true>;
         notifications: import("drizzle-orm").Many<"notifications">;
+        pushTokens: import("drizzle-orm").Many<"push_tokens">;
     }>;
     vendorsRelations: import("drizzle-orm").Relations<"vendors", {
         owner: import("drizzle-orm").One<"users", false>;
@@ -2358,6 +2359,115 @@ declare function createDb(): import("drizzle-orm/node-postgres").NodePgDatabase<
             createdAt: import("drizzle-orm/pg-core").PgColumn<{
                 name: "created_at";
                 tableName: "notifications";
+                dataType: "date";
+                columnType: "PgTimestamp";
+                data: Date;
+                driverParam: string;
+                notNull: true;
+                hasDefault: true;
+                isPrimaryKey: false;
+                isAutoincrement: false;
+                hasRuntimeDefault: false;
+                enumValues: undefined;
+                baseColumn: never;
+                identity: undefined;
+                generated: undefined;
+            }, {}, {}>;
+        };
+        dialect: "pg";
+    }>;
+    pushTokens: import("drizzle-orm/pg-core").PgTableWithColumns<{
+        name: "push_tokens";
+        schema: undefined;
+        columns: {
+            id: import("drizzle-orm/pg-core").PgColumn<{
+                name: "id";
+                tableName: "push_tokens";
+                dataType: "string";
+                columnType: "PgUUID";
+                data: string;
+                driverParam: string;
+                notNull: true;
+                hasDefault: true;
+                isPrimaryKey: true;
+                isAutoincrement: false;
+                hasRuntimeDefault: false;
+                enumValues: undefined;
+                baseColumn: never;
+                identity: undefined;
+                generated: undefined;
+            }, {}, {}>;
+            userId: import("drizzle-orm/pg-core").PgColumn<{
+                name: "user_id";
+                tableName: "push_tokens";
+                dataType: "string";
+                columnType: "PgUUID";
+                data: string;
+                driverParam: string;
+                notNull: true;
+                hasDefault: false;
+                isPrimaryKey: false;
+                isAutoincrement: false;
+                hasRuntimeDefault: false;
+                enumValues: undefined;
+                baseColumn: never;
+                identity: undefined;
+                generated: undefined;
+            }, {}, {}>;
+            token: import("drizzle-orm/pg-core").PgColumn<{
+                name: "token";
+                tableName: "push_tokens";
+                dataType: "string";
+                columnType: "PgText";
+                data: string;
+                driverParam: string;
+                notNull: true;
+                hasDefault: false;
+                isPrimaryKey: false;
+                isAutoincrement: false;
+                hasRuntimeDefault: false;
+                enumValues: [string, ...string[]];
+                baseColumn: never;
+                identity: undefined;
+                generated: undefined;
+            }, {}, {}>;
+            platform: import("drizzle-orm/pg-core").PgColumn<{
+                name: "platform";
+                tableName: "push_tokens";
+                dataType: "string";
+                columnType: "PgText";
+                data: string;
+                driverParam: string;
+                notNull: false;
+                hasDefault: false;
+                isPrimaryKey: false;
+                isAutoincrement: false;
+                hasRuntimeDefault: false;
+                enumValues: [string, ...string[]];
+                baseColumn: never;
+                identity: undefined;
+                generated: undefined;
+            }, {}, {}>;
+            lastSeenAt: import("drizzle-orm/pg-core").PgColumn<{
+                name: "last_seen_at";
+                tableName: "push_tokens";
+                dataType: "date";
+                columnType: "PgTimestamp";
+                data: Date;
+                driverParam: string;
+                notNull: true;
+                hasDefault: true;
+                isPrimaryKey: false;
+                isAutoincrement: false;
+                hasRuntimeDefault: false;
+                enumValues: undefined;
+                baseColumn: never;
+                identity: undefined;
+                generated: undefined;
+            }, {}, {}>;
+            createdAt: import("drizzle-orm/pg-core").PgColumn<{
+                name: "created_at";
+                tableName: "push_tokens";
                 dataType: "date";
                 columnType: "PgTimestamp";
                 data: Date;

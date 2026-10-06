@@ -13,6 +13,7 @@ exports.usersRelations = (0, drizzle_orm_1.relations)(schema_1.users, ({ one, ma
         references: [schema_1.customers.userId],
     }),
     notifications: many(schema_1.notifications),
+    pushTokens: many(schema_1.pushTokens),
 }));
 exports.vendorsRelations = (0, drizzle_orm_1.relations)(schema_1.vendors, ({ one, many }) => ({
     owner: one(schema_1.users, {

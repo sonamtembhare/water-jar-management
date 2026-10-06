@@ -412,3 +412,28 @@ export const notifications = pgTable(
     index("notifications_user_read_idx").on(table.userId, table.readAt),
   ],
 )
+
+/**
+ * Expo push tokens registered by the vendor mobile app. One row per device.
+ *
+ * `token` is globally unique so a phone that switches accounts re-owns the row
+ * on register instead of accumulating duplicates, and so a rolled/rotated token
+ * can be pruned after the push service reports `DeviceNotRegistered`.
+ */
+export const pushTokens = pgTable(
+  "push_tokens",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    token: text("token").notNull(),
+    platform: text("platform"),
+    lastSeenAt: timestamp("last_seen_at").notNull().defaultNow(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("push_tokens_token_idx").on(table.token),
+    index("push_tokens_user_idx").on(table.userId),
+  ],
+)
