@@ -2,7 +2,6 @@ import express from "express"
 import cors from "cors"
 import helmet from "helmet"
 import { env } from "./config/env"
-import { ApiError } from "./middleware/error"
 import { authenticate, errorHandler, notFoundHandler, requireAuth } from "./middleware/auth"
 import { authRouter } from "./routes/auth.routes"
 import { publicVendorsRouter, vendorProtectedRouter } from "./routes/vendors.routes"
@@ -40,39 +39,13 @@ function isLocalOrigin(origin: string) {
   return /^10\./.test(host) || /^192\.168\./.test(host) || /^172\.(1[6-9]|2\d|3[01])\./.test(host)
 }
 
-/**
- * Matches one CORS_ORIGIN entry against a browser origin. An entry may use `*`
- * as a whole segment (e.g. `https://*.vercel.app`) so preview deployments of the
- * web app can be allowed without listing every generated hostname.
- */
-function matchesOrigin(origin: string, allowed: string) {
-  if (allowed === "*") return true
-  if (!allowed.includes("*")) return allowed === origin
-  const pattern = allowed
-    .split("*")
-    .map((part) => part.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
-    .join("[^\\s]*")
-  return new RegExp(`^${pattern}$`).test(origin)
-}
-
 app.use(
   cors({
     origin(origin, callback) {
       if (!origin) return callback(null, true)
-      if (allowedOrigins.some((allowed) => matchesOrigin(origin, allowed))) {
-        return callback(null, true)
-      }
+      if (allowedOrigins.includes(origin)) return callback(null, true)
       if (env.NODE_ENV !== "production" && isLocalOrigin(origin)) return callback(null, true)
-      // 403, not a generic 500: an origin that is not in CORS_ORIGIN can never
-      // read the response, so rejecting it outright avoids running the route
-      // (and its DB writes) for a request the browser will throw away.
-      return callback(
-        new ApiError(
-          403,
-          `Origin not allowed: ${origin}. Add it to CORS_ORIGIN on the API deployment.`,
-          "CORS_ORIGIN_REJECTED"
-        )
-      )
+      callback(new Error(`CORS blocked origin: ${origin}`))
     },
   }),
 )
