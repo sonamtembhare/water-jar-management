@@ -110,6 +110,13 @@ export default function DashboardScreen({ navigate }: NavProps) {
             >
                 <Text style={styles.secondaryButtonText}>View Customers</Text>
             </TouchableOpacity>
+
+            <TouchableOpacity
+                style={[styles.secondaryButton, styles.deliveriesButton]}
+                onPress={() => navigate({ name: "deliveries" })}
+            >
+                <Text style={styles.secondaryButtonText}>Delivery History</Text>
+            </TouchableOpacity>
         </ScrollView>
     );
 }
@@ -264,5 +271,9 @@ const styles = StyleSheet.create({
         color: "#0284c7",
         fontSize: 17,
         fontWeight: "700",
+    },
+
+    deliveriesButton: {
+        marginTop: 12,
     },
 });

@@ -8,6 +8,8 @@ import {
 
 import type {
     OrderDetail,
+    OrderStatus,
+    OrderStatusUpdateInput,
     Product,
     VendorAnalytics,
     VendorCustomerCreateInput,
@@ -16,6 +18,7 @@ import type {
     VendorCustomerListResponse,
     VendorCustomerUpdateInput,
     VendorDeliveryCreateInput,
+    VendorDeliveryListResponse,
 } from "@repo/types";
 
 import type { RootState } from "./store";
@@ -158,6 +161,30 @@ export const api = createApi({
             query: (body) => ({ url: "/vendor/deliveries", method: "POST", body }),
             invalidatesTags: ["Delivery", "Vendor", "Customer"],
         }),
+
+        // ---- Delivery history (orders recorded by the vendor) ----
+        vendorDeliveries: builder.query<
+            VendorDeliveryListResponse,
+            { page?: number; pageSize?: number }
+        >({
+            query: (params) => ({ url: "/vendor/deliveries", params }),
+            providesTags: ["Delivery"],
+        }),
+
+        // Advances a recorded delivery through the existing status machine
+        // (pending → accepted → out_for_delivery → delivered). The server
+        // enforces the allowed transitions against the JWT vendor.
+        updateVendorDeliveryStatus: builder.mutation<
+            OrderDetail,
+            { id: string; status: OrderStatus; note?: string }
+        >({
+            query: ({ id, ...body }: OrderStatusUpdateInput & { id: string }) => ({
+                url: `/vendor/orders/${id}/status`,
+                method: "PATCH",
+                body,
+            }),
+            invalidatesTags: ["Delivery", "Vendor", "Customer"],
+        }),
     }),
 });
 
@@ -170,4 +197,6 @@ export const {
     useCreateVendorCustomerMutation,
     useUpdateVendorCustomerMutation,
     useCreateVendorDeliveryMutation,
+    useVendorDeliveriesQuery,
+    useUpdateVendorDeliveryStatusMutation,
 } = api;

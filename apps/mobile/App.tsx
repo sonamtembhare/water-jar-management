@@ -10,6 +10,7 @@ import CustomersScreen from "./screens/CustomersScreen";
 import AddCustomerScreen from "./screens/AddCustomerScreen";
 import EditCustomerScreen from "./screens/EditCustomerScreen";
 import CustomerDetailsScreen from "./screens/CustomerDetailsScreen";
+import DeliveryHistoryScreen from "./screens/DeliveryHistoryScreen";
 
 /**
  * Minimal route stack: the app has no navigation library wired up, so the
@@ -19,6 +20,7 @@ import CustomerDetailsScreen from "./screens/CustomerDetailsScreen";
 export type Route =
     | { name: "dashboard" }
     | { name: "addDelivery" }
+    | { name: "deliveries" }
     | { name: "customers" }
     | { name: "addCustomer" }
     | { name: "editCustomer"; id: string }
@@ -44,6 +46,8 @@ function VendorApp() {
     switch (route.name) {
         case "addDelivery":
             return <AddDeliveryScreen navigate={navigate} goBack={goBack} />;
+        case "deliveries":
+            return <DeliveryHistoryScreen navigate={navigate} goBack={goBack} />;
         case "customers":
             return <CustomersScreen navigate={navigate} goBack={goBack} />;
         case "addCustomer":
