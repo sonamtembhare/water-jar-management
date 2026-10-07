@@ -78,15 +78,13 @@ export default function AddDeliveryScreen({ goBack }: NavProps) {
 
     const onSubmit = async (values: VendorDeliveryCreateInput) => {
         try {
-            const order = await createDelivery({
+            await createDelivery({
                 ...values,
                 notes: values.notes?.trim() ? values.notes.trim() : undefined,
             }).unwrap();
             Alert.alert(
                 "Order confirmed successfully",
-                order.emailSent
-                    ? "Confirmation email sent to customer."
-                    : "Order created, but the confirmation email could not be sent.",
+                "The order was recorded successfully.",
             );
             goBack();
         } catch (error) {

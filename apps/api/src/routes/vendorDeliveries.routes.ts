@@ -155,9 +155,9 @@ vendorDeliveryRouter.post(
 
     // The order is fully committed in PostgreSQL before any email is sent, so a
     // customer only ever receives a confirmation once the delivery is saved.
-    // notify() inserts the in-app notification, fires the Expo push, and sends
-    // the SMTP email to the customer; it reports whether the email actually went out.
-    const emailSent = await notify({
+    // notify() inserts the in-app notification, then sends the Expo push and
+    // SMTP email in the background — SMTP must not block this response.
+    await notify({
       userId: relation.user.id,
       type: "delivery_created",
       title: "Delivery recorded",
@@ -175,6 +175,6 @@ vendorDeliveryRouter.post(
       }),
     })
 
-    res.status(201).json({ success: true, data: { ...detail, emailSent } })
+    res.status(201).json({ success: true, data: detail })
   }),
 )

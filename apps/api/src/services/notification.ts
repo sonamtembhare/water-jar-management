@@ -24,10 +24,11 @@ export interface NotifyInput {
 }
 
 /**
- * Creates the in-app notification, triggers the Expo push, and (when an SMTP
- * host is configured) sends the email. Returns whether the email went out, so
- * callers can report email status without breaking the primary flow — the
- * database write must already be committed before this is called.
+ * Creates the in-app notification (awaited, ~75ms) and then fires the Expo
+ * push and SMTP email in the background. SMTP routinely takes multiple seconds
+ * — including slow/failing auth — so awaiting it made write endpoints take
+ * 7–15s and surface client timeouts. The database write must already be
+ * committed before this is called.
  */
 export async function notify({
   userId,
@@ -37,7 +38,7 @@ export async function notify({
   href,
   emailRecipient,
   email,
-}: NotifyInput): Promise<boolean> {
+}: NotifyInput): Promise<void> {
   await db.insert(notifications).values({
     userId,
     type,
@@ -48,20 +49,14 @@ export async function notify({
 
   // Expo push for the vendor mobile app. `pushToUser` never throws, so a
   // failing push cannot break the request that triggered the notification.
-  await pushToUser(userId, { title, body, data: { type, href: href ?? null } })
+  void pushToUser(userId, { title, body, data: { type, href: href ?? null } })
 
-  if (!emailRecipient || !process.env.SMTP_HOST) return false
-  try {
-    await sendEmail({
-      to: emailRecipient,
-      subject: email?.subject ?? title,
-      text: email?.text ?? body,
-    })
-    return true
-  } catch (err) {
-    console.error("[EmailError]", err)
-    return false
-  }
+  if (!emailRecipient || !process.env.SMTP_HOST) return
+  void sendEmail({
+    to: emailRecipient,
+    subject: email?.subject ?? title,
+    text: email?.text ?? body,
+  }).catch((err) => console.error("[EmailError]", err))
 }
 
 /** Builds the order-status email both the customer and the vendor receive. */

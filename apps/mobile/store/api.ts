@@ -154,10 +154,7 @@ export const api = createApi({
         }),
 
         // ---- Deliveries (orders recorded by the vendor) ----
-        createVendorDelivery: builder.mutation<
-            OrderDetail & { emailSent: boolean },
-            VendorDeliveryCreateInput
-        >({
+        createVendorDelivery: builder.mutation<OrderDetail, VendorDeliveryCreateInput>({
             query: (body) => ({ url: "/vendor/deliveries", method: "POST", body }),
             invalidatesTags: ["Delivery", "Vendor", "Customer"],
         }),
