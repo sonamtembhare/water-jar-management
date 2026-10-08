@@ -10,6 +10,7 @@
     "postinstall": "node scripts/ensure-workspace-dist.mjs"
   },
   "devDependencies": {
+    "@babel/core": "^7.29.0",
     "@types/node": "^26.6.4",
     "prettier": "3.9.6",
     "turbo": "^2.11.5",

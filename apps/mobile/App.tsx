@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Provider, useSelector } from "react-redux";
 
@@ -30,6 +31,62 @@ export type NavProps = {
     navigate: (route: Route) => void;
     goBack: () => void;
 };
+
+// Expo Router implementations of the NavProps contract, used by the route
+// files in app/ so the screens keep receiving navigate/goBack unchanged.
+export function navigate(route: Route) {
+    switch (route.name) {
+        case "dashboard":
+            router.push("/dashboard");
+            break;
+        case "addDelivery":
+            router.push("/add-delivery");
+            break;
+        case "deliveries":
+            router.push("/deliveries");
+            break;
+        case "customers":
+            router.push("/customers");
+            break;
+        case "addCustomer":
+            router.push("/add-customer");
+            break;
+        case "editCustomer":
+            router.push({
+                pathname: "/edit-customer",
+                params: { id: route.id },
+            });
+            break;
+        case "customerDetails":
+            router.push({
+                pathname: "/customer-details",
+                params: { id: route.id },
+            });
+            break;
+    }
+}
+
+export function goBack() {
+    if (router.canGoBack()) {
+        router.back();
+    }
+}
+
+export function RequireAuth({ children }: { children: ReactNode }) {
+    const token = useSelector((state: RootState) => state.auth.token);
+
+    useEffect(() => {
+        if (!token) {
+            router.replace("/");
+        }
+    }, [token]);
+
+    if (!token) {
+        return null;
+    }
+
+    return <>{children}</>;
+}
 
 // Mounted only while a token exists. Because it unmounts on logout, each new
 // login starts on a fresh dashboard stack (no stale deep screen left behind).
