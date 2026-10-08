@@ -11,7 +11,7 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
     vendorCustomerCreateSchema,
@@ -29,7 +29,8 @@ export default function AddCustomerScreen({ goBack }: NavProps) {
         useCreateVendorCustomerMutation();
 
     const {
-        register,
+        control,
+        setValue,
         handleSubmit,
         formState: { errors },
     } = useForm<VendorCustomerCreateInput>({
@@ -39,9 +40,11 @@ export default function AddCustomerScreen({ goBack }: NavProps) {
             email: "",
             password: "",
             phone: "",
-            address: "",
+            address: undefined,
         },
     });
+
+    const formValues = useWatch({ control });
 
     const onSubmit = async (values: VendorCustomerCreateInput) => {
         try {
@@ -71,7 +74,14 @@ export default function AddCustomerScreen({ goBack }: NavProps) {
                 autoCapitalize="none"
                 autoCorrect={false}
                 {...props}
-                {...register(key)}
+                value={formValues[key] ?? ""}
+                onChangeText={(text) =>
+                    setValue(
+                        key,
+                        text === "" && key === "address" ? undefined : text,
+                        { shouldDirty: true, shouldValidate: true },
+                    )
+                }
             />
             {errors[key] && (
                 <Text style={styles.error}>{errors[key]?.message}</Text>

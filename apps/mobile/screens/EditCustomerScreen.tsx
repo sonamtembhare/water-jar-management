@@ -11,7 +11,7 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
     vendorCustomerUpdateSchema,
@@ -36,21 +36,24 @@ export default function EditCustomerScreen({
         useUpdateVendorCustomerMutation();
 
     const {
-        register,
+        control,
+        setValue,
         handleSubmit,
         reset,
         formState: { errors },
     } = useForm<VendorCustomerUpdateInput>({
         resolver: zodResolver(vendorCustomerUpdateSchema),
-        defaultValues: { name: "", phone: "", address: "" },
+        defaultValues: { name: "", phone: "", address: undefined },
     });
+
+    const formValues = useWatch({ control });
 
     useEffect(() => {
         if (customer) {
             reset({
                 name: customer.name,
                 phone: customer.phone ?? "",
-                address: customer.address ?? "",
+                address: customer.address ?? undefined,
             });
         }
     }, [customer, reset]);
@@ -105,7 +108,14 @@ export default function EditCustomerScreen({
                 autoCapitalize="none"
                 autoCorrect={false}
                 {...props}
-                {...register(key)}
+                value={formValues[key] ?? ""}
+                onChangeText={(text) =>
+                    setValue(
+                        key,
+                        text === "" && key === "address" ? undefined : text,
+                        { shouldDirty: true, shouldValidate: true },
+                    )
+                }
             />
             {errors[key] && (
                 <Text style={styles.error}>{errors[key]?.message}</Text>

@@ -29,7 +29,7 @@ export default function DashboardScreen({ navigate }: NavProps) {
         isError,
         error,
         refetch,
-    } = useVendorOverviewQuery();
+    } = useVendorOverviewQuery(undefined, { refetchOnMountOrArgChange: true });
 
     const vendorName = user?.name?.trim() || "Vendor";
 

@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "d3b3f0ab-4887-4e60-9577-fdc928231110"
+      }
+    },
+    "android": {
+      "package": "com.sonamtembhare.waterjarmanagement"
+    }
+  }
+}

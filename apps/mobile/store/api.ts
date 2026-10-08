@@ -94,6 +94,11 @@ export const api = createApi({
     reducerPath: "api",
     baseQuery,
 
+    // Apply tag invalidations as soon as a mutation settles instead of
+    // deferring them behind other in-flight requests (the default "delayed"
+    // behavior can strand them, leaving the dashboard on stale stats).
+    invalidationBehavior: "immediately",
+
     tagTypes: [
         "Vendor",
         "Customer",
